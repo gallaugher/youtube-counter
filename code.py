@@ -67,8 +67,10 @@ play_bitmap[2, 3] = 1
 play_bitmap[3, 2] = 1
 
 # Create TileGrid objects for the logo and play button
-logo_grid = displayio.TileGrid(logo_bitmap, pixel_shader=logo_palette, x=1, y=2)
-play_grid = displayio.TileGrid(play_bitmap, pixel_shader=play_palette, x=5, y=4)
+# Logo moved up 1 pixel (from y=2 to y=1)
+logo_grid = displayio.TileGrid(logo_bitmap, pixel_shader=logo_palette, x=1, y=1)
+# Play button also moved up 1 pixel (from y=4 to y=3)
+play_grid = displayio.TileGrid(play_bitmap, pixel_shader=play_palette, x=5, y=3)
 
 # Add the YouTube logo and play button to the main group
 main_group.append(logo_grid)
@@ -77,72 +79,107 @@ main_group.append(play_grid)
 # Channel name
 channel_name = "YouTube.com/profgallaugher"
 
-# Try to load the Tom Thumb font (smaller font)
-small_font = None
+# Define font file names
+# channel_font_name = "helvR08.bdf"    # Too Big
+# channel_font_name = "t0-11-uni.bdf"    # Not bad
+# channel_font_name = "spleen-5x8.bdf"    # Not bad
+# channel_font_name = "ib8x8u.bdf"    # Cool & bold but wide
+# channel_font_name = "ic8x8u.bdf"    # Cool & bold but wide
+# channel_font_name = "icl8x8u.bdf"     # single pixel, but wide
+channel_font_name = "profont10_clean.bdf"    # Cool & bold but wide
+
+subs_value_font_name = "helvB08.bdf"   # Font for subscriber count
+# subs_value_font_name = "ic8x8u.bdf"   # Too thick
+views_value_font_name = "helvB08.bdf"  # Font for view count
+# label_font_name = "t0-11-uni.bdf"      # Too Wide
+# label_font_name = "spleen-5x8.bdf"      # Raised up a bit.
+# label_font_name = "helvR08.bdf"      # Font for "sub:" and "view:" labels
+label_font_name = "profont10_clean.bdf"      # Font for "sub:" and "view:" labels
+
+
+# Load channel font (for scrolling channel name)
+channel_font = None
 try:
-    print("Attempting to load Tom Thumb font...")
-    # Try Tom Thumb Tall first, then regular
-    try:
-        small_font = bitmap_font.load_font("/fonts/tom-thumb-tall.bdf")
-        print("Successfully loaded Tom Thumb Tall font")
-    except Exception as e:
-        print("Tom Thumb Tall failed, trying regular version")
-        small_font = bitmap_font.load_font("/fonts/tom-thumb.bdf")
-        print("Successfully loaded regular Tom Thumb font")
-
-    font_to_use = small_font
-    y_position = 5
-
+    print(f"Attempting to load channel font: {channel_font_name}...")
+    channel_font = bitmap_font.load_font(f"/fonts/{channel_font_name}")
+    print(f"Successfully loaded {channel_font_name} font")
+    y_position = 4
 except Exception as e:
-    print("Couldn't load either Tom Thumb font")
-    print("Falling back to built-in font")
-    font_to_use = terminalio.FONT
+    print(f"Couldn't load channel font: {channel_font_name}, {e}")
+    print("Falling back to built-in font for channel name")
+    channel_font = terminalio.FONT
     y_position = 6
 
-# Try to load font for the stats
-stats_font = None
+# Load font for subscriber value
+subs_value_font = None
 try:
-    font_name = "helvR08.bdf"  # Use the font you specified
-    stats_font = bitmap_font.load_font(f"/fonts/{font_name}")
-    print(f"Successfully loaded {font_name} font for stats")
+    print(f"Loading subscriber value font: {subs_value_font_name}...")
+    subs_value_font = bitmap_font.load_font(f"/fonts/{subs_value_font_name}")
+    print(f"Successfully loaded {subs_value_font_name} font")
 except Exception as e:
-    print(f"Couldn't load {font_name}")
-    stats_font = terminalio.FONT
-    print("Using built-in font for stats")
+    print(f"Couldn't load subscriber value font: {e}")
+    subs_value_font = terminalio.FONT
+    print("Using built-in font for subscriber value")
+
+# Load font for views value
+views_value_font = None
+try:
+    print(f"Loading views value font: {views_value_font_name}...")
+    views_value_font = bitmap_font.load_font(f"/fonts/{views_value_font_name}")
+    print(f"Successfully loaded {views_value_font_name} font")
+except Exception as e:
+    print(f"Couldn't load views value font: {e}")
+    views_value_font = terminalio.FONT
+    print("Using built-in font for views value")
+
+# Load font for labels ("sub:" and "view:")
+label_font = None
+try:
+    print(f"Loading label font: {label_font_name}...")
+    label_font = bitmap_font.load_font(f"/fonts/{label_font_name}")
+    print(f"Successfully loaded {label_font_name} font")
+except Exception as e:
+    print(f"Couldn't load label font: {e}")
+    label_font = terminalio.FONT
+    print("Using built-in font for labels")
 
 # Create a label for subscriber label (left-aligned)
+# Moved up one more pixel (from y=15 to y=14)
 sub_label = Label(
-    stats_font,
-    text="sub:",
+    label_font,  # Using the dedicated label font
+    text="sub",
     color=0xFFFFFF,
     x=2,  # Left side of screen
-    y=16  # Position in the middle, nudged up one pixel as requested
+    y=14  # Moved up one pixel for better alignment
 )
 
 # Create a label for subscriber value (right-aligned)
+# Moved up one more pixel (from y=17 to y=16)
 sub_value = Label(
-    stats_font,
-    text="Loading...",
+    subs_value_font,  # Using dedicated subscriber value font
+    text="Loading...",  # Will be updated with API data
     color=0xFFFFFF,
     anchored_position=(64, 16),  # Right edge of screen, same y as sub_label
     anchor_point=(1.0, 0.5)  # Right-aligned, vertically centered
 )
 
 # Create a label for views label (left-aligned)
+# Moved up one more pixel (from y=26 to y=25)
 views_label = Label(
-    stats_font,
-    text="v:",
+    label_font,  # Using the dedicated label font
+    text="view",
     color=0xFFFFFF,
     x=2,  # Left side of screen
-    y=28  # Bottom area
+    y=25  # Moved up one pixel for better alignment
 )
 
 # Create a label for views value (right-aligned)
+# Moved up one more pixel (from y=28 to y=27)
 views_value = Label(
-    stats_font,
-    text="Loading...",
+    views_value_font,  # Using dedicated views value font
+    text="Loading...",  # Will be updated with API data
     color=0xFFFFFF,
-    anchored_position=(64, 28),  # Right edge, bottom area
+    anchored_position=(64, 27),  # Right edge, bottom area
     anchor_point=(1.0, 0.5)  # Right-aligned, vertically centered
 )
 
@@ -153,9 +190,9 @@ main_group.append(views_label)
 main_group.append(views_value)
 
 # Create the channel label - initially empty
-# It will always stay fixed at x=17
+# It will always stay fixed at x=16
 channel_label = Label(
-    font_to_use,
+    channel_font,  # Using the dedicated channel font
     text="",  # Start empty, we'll update this
     color=0xFFFFFF,
     x=16,  # Position to the right of the logo (adjusted for new logo width)
@@ -168,19 +205,6 @@ matrixportal.graphics.display.root_group = main_group
 
 print(f"Display dimensions: {matrixportal.graphics.display.width}x{matrixportal.graphics.display.height}")
 print("Portal code running...")
-
-# Calculate approximately how many characters fit in the display
-# This is a rough estimate - may need adjustment based on font
-char_width = 6  # Average width of a character in pixels for most fonts
-if small_font is not None:  # If we know we have the small font
-    char_width = 4  # Tom Thumb is about 4 pixels per character
-
-# How many full characters can be shown at once
-logo_width = 16  # The space taken by the YouTube logo (adjusted for new width)
-display_width = matrixportal.graphics.display.width
-max_visible_chars = (display_width - logo_width) // char_width
-print(f"Max visible characters: ~{max_visible_chars}")
-
 
 # Function to fetch YouTube statistics
 def fetch_youtube_stats():
@@ -202,6 +226,17 @@ def fetch_youtube_stats():
         print(f"Error fetching YouTube stats: {e}")
         return None, None
 
+# Calculate approximately how many characters fit in the display
+# This is a rough estimate - may need adjustment based on font
+char_width = 6  # Average width of a character in pixels for most fonts
+if channel_font != terminalio.FONT:  # If we're using a custom channel font
+    char_width = 4  # Estimate for smaller fonts
+
+# How many full characters can be shown at once
+logo_width = 16  # The space taken by the YouTube logo (adjusted for new width)
+display_width = matrixportal.graphics.display.width
+max_visible_chars = (display_width - logo_width) // char_width
+print(f"Max visible characters: ~{max_visible_chars}")
 
 # Variables for scrolling
 SCROLL_STATIC_TIME = 1.0  # Seconds to show the non-scrolling name
@@ -227,8 +262,8 @@ if subs and views:
     print(f"Updated display with: {subs} subscribers, {views} views")
 else:
     print("Failed to get initial stats, using placeholder values")
-    sub_value.text = "10,000"
-    views_value.text = "1,000,000"
+    sub_value.text = "8,920"
+    views_value.text = "757,696"
 
 # Main loop
 while True:
