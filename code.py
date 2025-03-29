@@ -1,47 +1,45 @@
 # Code by Prof. John Gallaugher. Full Build Video on his Maker YouTube Channel:
 # https://YouTube.com/@BuildWithProfG
-# Please subscribe - this channel needs more subs
 # Also check out his more subscribed SwiftUI channel:
 # https://YouTube.com/profgallaugher
 # BlueSky: @gallaugher.bsky.social
 # Uses Adafruit MatrixPortal M4 & 64 x 32 LED matrix display.
-# Also assumes the CIRCUITPY volume for the portal has apprpriate
-# fonts & settings.toml file for local Wi-Fi.
+# Assumes CIRCUITPY contains:
+# - /fonts directory with chosen fonts
+# - settings.toml file with Wi-Fi, API keys, and CHANNEL_NAME
+
 import board
 import time
 import terminalio
 import displayio
 import os
-import json
 from adafruit_matrixportal.matrixportal import MatrixPortal
 from adafruit_display_text.label import Label
 from adafruit_bitmap_font import bitmap_font
 
-# ==== !!! CHANGE CHANNEL NAME BELOW !!! ====
-channel_name = "YouTube.com/profgallaugher"
-
 # ==== USER-CONFIGURABLE CONSTANTS ====
-DEFAULT_SUBS = 300 # These show up if there is no access to the API
+DEFAULT_SUBS = 300
 DEFAULT_VIEWS = 1000
 
-SUB_ADJUST = 0 # You can add adjustment if studio.youtube.com is significantly off
-VIEW_ADJUST = 0
+SUB_ADJUST = 0
+VIEW_ADJUST = 250000
 
-FALLBACK_COLOR = 0x55FF55  # subtle green - no WiFi connection
-ERROR_COLOR = 0xFFFF55  # subtle yellow - no API access
-NORMAL_COLOR = 0xFFFFFF  # white
+FALLBACK_COLOR = 0x55FF55
+ERROR_COLOR = 0xFFFF55
+NORMAL_COLOR = 0xFFFFFF
 
-ERROR_RETRY_INTERVAL = 30  # in seconds
-NORMAL_REFRESH_INTERVAL = 5 * 60  # 5 minutes
+ERROR_RETRY_INTERVAL = 30
+NORMAL_REFRESH_INTERVAL = 5 * 60
 
-# ==== MatrixPortal setup ====
-matrixportal = MatrixPortal(
-    status_neopixel=board.NEOPIXEL,
-    bit_depth=6,
-)
+CHAR_SPACING = 1  # spacing between characters
 
+# ==== Load from settings.toml ====
 API_KEY = os.getenv("YOUTUBE_API_KEY")
 CHANNEL_ID = os.getenv("CHANNEL_ID")
+channel_name = os.getenv("CHANNEL_NAME")  # Moved from hardcoded
+
+# ==== MatrixPortal setup ====
+matrixportal = MatrixPortal(status_neopixel=board.NEOPIXEL, bit_depth=6)
 
 YOUTUBE_API_URL = (
     "https://www.googleapis.com/youtube/v3/channels"
@@ -71,24 +69,17 @@ play_palette = displayio.Palette(2)
 play_palette[0] = youtube_red
 play_palette[1] = 0xFFFFFF
 
-play_bitmap[1, 0] = 1
-play_bitmap[1, 1] = 1
-play_bitmap[1, 2] = 1
-play_bitmap[1, 3] = 1
-play_bitmap[1, 4] = 1
-play_bitmap[2, 1] = 1
-play_bitmap[2, 2] = 1
-play_bitmap[2, 3] = 1
-play_bitmap[3, 2] = 1
+for x, y in [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (2, 2), (2, 3), (3, 2)]:
+    play_bitmap[x, y] = 1
 
 main_group.append(displayio.TileGrid(logo_bitmap, pixel_shader=logo_palette, x=1, y=1))
 main_group.append(displayio.TileGrid(play_bitmap, pixel_shader=play_palette, x=5, y=3))
 
 # ==== Fonts ====
-channel_font_name = "profont10_clean.bdf"
+channel_font_name = "Rockbox-Propfont.bdf"
 subs_value_font_name = "helvB08.bdf"
 views_value_font_name = "helvB08.bdf"
-label_font_name = "profont10_clean.bdf"
+label_font_name = "Rockbox-Propfont.bdf"  # now using same nice font
 
 try:
     channel_font = bitmap_font.load_font(f"/fonts/{channel_font_name}")
@@ -114,10 +105,10 @@ except:
 
 # ==== Labels ====
 sub_label = Label(label_font, text="sub", color=NORMAL_COLOR, x=2, y=14)
-sub_value = Label(subs_value_font, text="Loading...", color=NORMAL_COLOR,
+sub_value = Label(subs_value_font, text="Loading", color=NORMAL_COLOR,
                   anchored_position=(64, 16), anchor_point=(1.0, 0.5))
 views_label = Label(label_font, text="view", color=NORMAL_COLOR, x=2, y=25)
-views_value = Label(views_value_font, text="Loading...", color=NORMAL_COLOR,
+views_value = Label(views_value_font, text="Loading", color=NORMAL_COLOR,
                     anchored_position=(64, 27), anchor_point=(1.0, 0.5))
 
 main_group.append(sub_label)
@@ -129,14 +120,17 @@ main_group.append(views_value)
 display_width = matrixportal.graphics.display.width
 visible_x_start = 15
 visible_x_end = display_width
-char_width = 4
-text_pixel_width = len(channel_name) * char_width
 
 char_labels = []
-for i, c in enumerate(channel_name):
+x_offset = 0
+text_pixel_width = 0
+for c in channel_name:
     label = Label(channel_font, text=c, color=NORMAL_COLOR)
     label.y = y_position
-    char_labels.append((label, i * char_width))
+    width = label.bounding_box[2]
+    char_labels.append((label, x_offset))
+    x_offset += width + CHAR_SPACING
+    text_pixel_width += width + CHAR_SPACING
 
 scrolling_chars_group = displayio.Group()
 main_group.append(scrolling_chars_group)
