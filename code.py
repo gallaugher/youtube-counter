@@ -21,11 +21,11 @@ from adafruit_bitmap_font import bitmap_font
 DEFAULT_SUBS = 300 # These show up if there is no access to the API
 DEFAULT_VIEWS = 1000
 
-SUB_ADJUST = 0
-VIEW_ADJUST = 0  
+SUB_ADJUST = 0 # You can add adjustment if studio.youtube.com is significantly off
+VIEW_ADJUST = 0
 
-FALLBACK_COLOR = 0x55FF55  # subtle green
-ERROR_COLOR = 0xFFFF55  # subtle yellow
+FALLBACK_COLOR = 0x55FF55  # subtle green - no WiFi connection
+ERROR_COLOR = 0xFFFF55  # subtle yellow - no API access
 NORMAL_COLOR = 0xFFFFFF  # white
 
 ERROR_RETRY_INTERVAL = 30  # in seconds
