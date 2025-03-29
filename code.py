@@ -18,11 +18,11 @@ from adafruit_display_text.label import Label
 from adafruit_bitmap_font import bitmap_font
 
 # ==== USER-CONFIGURABLE CONSTANTS ====
-DEFAULT_SUBS = 300
+DEFAULT_SUBS = 300 # These show up if there is no access to the API
 DEFAULT_VIEWS = 1000
 
 SUB_ADJUST = 0
-VIEW_ADJUST = 251495  # as of March 27, 2025
+VIEW_ADJUST = 0  
 
 FALLBACK_COLOR = 0x55FF55  # subtle green
 ERROR_COLOR = 0xFFFF55  # subtle yellow
