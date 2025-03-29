@@ -17,6 +17,9 @@ from adafruit_matrixportal.matrixportal import MatrixPortal
 from adafruit_display_text.label import Label
 from adafruit_bitmap_font import bitmap_font
 
+# ==== !!! CHANGE CHANNEL NAME BELOW !!! ====
+channel_name = "YouTube.com/profgallaugher"
+
 # ==== USER-CONFIGURABLE CONSTANTS ====
 DEFAULT_SUBS = 300 # These show up if there is no access to the API
 DEFAULT_VIEWS = 1000
@@ -82,7 +85,6 @@ main_group.append(displayio.TileGrid(logo_bitmap, pixel_shader=logo_palette, x=1
 main_group.append(displayio.TileGrid(play_bitmap, pixel_shader=play_palette, x=5, y=3))
 
 # ==== Fonts ====
-channel_name = "YouTube.com/profgallaugher"
 channel_font_name = "profont10_clean.bdf"
 subs_value_font_name = "helvB08.bdf"
 views_value_font_name = "helvB08.bdf"
