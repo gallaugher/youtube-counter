@@ -5,3 +5,6 @@ CIRCUITPY_WIFI_PASSWORD = "WIFI PASSWORD HERE"
 # YouTube API settings
 YOUTUBE_API_KEY = "YOUTUBE API KEY FOR YOUR CHANNEL"
 CHANNEL_ID = "YOUR YOUTUBE CHANNEL ID"
+
+# Enter Channel Name as you want it shown on the scrolling part of your display
+CHANNEL_NAME = "YOUR CHANNEL NAME OR URL HERE"
