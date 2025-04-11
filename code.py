@@ -15,7 +15,7 @@ from adafruit_bitmap_font import bitmap_font
 DEFAULT_SUBS = 300
 DEFAULT_VIEWS = 1000
 SUB_ADJUST = 0
-VIEW_ADJUST = 0
+VIEW_ADJUST = 0 # NOTE: Stats from yt app are higher, API ignores  views from retired videos no longer public.
 
 FALLBACK_COLOR = 0x55FF55  # Green
 ERROR_COLOR = 0xFFFF55  # Gold
@@ -40,6 +40,18 @@ print(f"Channel Name: {channel_name}")
 # ==== MatrixPortal setup ====
 print("Setting up MatrixPortal...")
 matrixportal = MatrixPortal(status_neopixel=board.NEOPIXEL, bit_depth=6, debug=True)
+
+# Get MAC address in proper order
+try:
+    # Access the ESP object from the existing MatrixPortal instance
+    esp = matrixportal.network._wifi.esp
+    if esp:
+        mac_bytes = esp.MAC_address
+        # Display MAC address in correct order (reversed)
+        mac = ":".join(["{:02X}".format(b) for b in reversed(mac_bytes)])
+        print(f"MAC Address: {mac}")
+except Exception as e:
+    print(f"Error getting MAC address: {e}")
 
 YOUTUBE_API_URL = (
     "https://www.googleapis.com/youtube/v3/channels"
