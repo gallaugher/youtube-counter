@@ -1,0 +1,22 @@
+# multi-channel-settings.toml
+# rename this as settings.toml
+# You can add multiple channels, just add a # in the same format shown below.
+
+CIRCUITPY_WIFI_SSID = Your Wi-Fi Name Here"
+CIRCUITPY_WIFI_PASSWORD = "Your Wi-Fi Password Here"
+test_variable = "Successfullly read from settings.toml. Woo hoo!"
+
+# First Channel
+YOUTUBE_API_KEY = "first-channel-key"
+CHANNEL_ID = "first-channel-id"
+CHANNEL_NAME = "first channel name/url to scroll"
+SUB_ADJUST = 0
+VIEW_ADJUST = 0
+# ADJUST figures are if the Views are off between studio.youtube.com & the API (API usually doesn't include info on retired views while studio does).
+
+# Second Channel
+YOUTUBE_API_KEY2 = "second-channel-key"
+CHANNEL_ID2 = "second-channel-id"
+CHANNEL_NAME2 = "second channel name/url to scroll"
+SUB_ADJUST2 = 0
+VIEW_ADJUST2 = 0
