@@ -15,7 +15,7 @@ from adafruit_bitmap_font import bitmap_font
 DEFAULT_SUBS = 300
 DEFAULT_VIEWS = 1000
 SUB_ADJUST = 0
-VIEW_ADJUST = 0 # NOTE: Stats from yt app are higher, API ignores views from retired videos no longer public.
+VIEW_ADJUST = 0  # NOTE: Stats from yt app are higher, API ignores views from retired videos no longer public.
 
 FALLBACK_COLOR = 0x55FF55  # Green
 ERROR_COLOR = 0xFFFF55  # Gold
@@ -41,31 +41,37 @@ print(f"Channel Name: {channel_name}")
 print("Setting up MatrixPortal...")
 matrixportal = MatrixPortal(status_neopixel=board.NEOPIXEL, bit_depth=6, debug=True)
 
-# Get MAC address for M4 or S3
-try:
-    print("Getting device MAC address...")
-    # Method for M4 (ESP32)
-    if hasattr(matrixportal.network._wifi, 'esp'):
-        esp = matrixportal.network._wifi.esp
-        if esp:
-            mac_bytes = esp.MAC_address
-            # Display MAC address in correct order (reversed)
-            mac = ":".join(["{:02X}".format(b) for b in reversed(mac_bytes)])
-            print(f"MAC Address: {mac}")
-    # Method for S3 and newer boards
-    else:
-        try:
-            # Try CircuitPython 7+ wifi module
-            import wifi
-            radio = wifi.radio
-            mac_bytes = radio.mac_address
-            mac = ":".join(["{:02X}".format(b) for b in mac_bytes])
-            print(f"MAC Address: {mac}")
-        except ImportError:
-            # Fallback display
-            print("MAC Address: Unavailable on this board")
-except Exception as e:
-    print(f"Error getting MAC address: {e}")
+
+# Extremely simple MAC address detection that avoids errors
+def get_safe_mac_address():
+    # Try the most common methods without producing errors
+
+    # Method 1: CircuitPython 7+ wifi module (S3)
+    try:
+        import wifi
+        mac_bytes = wifi.radio.mac_address
+        mac = ":".join(["{:02X}".format(b) for b in mac_bytes])
+        return f"MAC Address: {mac}"
+    except:
+        pass
+
+    # Method 2: ESP32 method (M4)
+    try:
+        if hasattr(matrixportal.network._wifi, 'esp'):
+            esp = matrixportal.network._wifi.esp
+            if hasattr(esp, 'MAC_address'):
+                mac_bytes = esp.MAC_address
+                mac = ":".join(["{:02X}".format(b) for b in reversed(mac_bytes)])
+                return f"MAC Address: {mac}"
+    except:
+        pass
+
+    # Fallback for when we can't determine MAC
+    return "MAC Address: Unable to determine on this device"
+
+
+# Print MAC address without any error messages
+print(get_safe_mac_address())
 
 YOUTUBE_API_URL = (
     "https://www.googleapis.com/youtube/v3/channels"
@@ -176,17 +182,19 @@ def show_stats(subs, views, color):
     views_value.text = format_stat(views)
 
 
+# Safe network info function that never throws errors
 def print_network_info():
     """Print the network connection details including IP address"""
-    if not matrixportal.network.is_connected:
-        print("Not connected to WiFi")
-        return
-
     try:
+        if not matrixportal.network.is_connected:
+            print("Not connected to WiFi")
+            return
+
+        # Only try to print IP - simplest approach
         ip_address = matrixportal.network.ip_address
         print(f"Connected to WiFi with IP address: {ip_address}")
-    except Exception as e:
-        print(f"Error getting network info: {e}")
+    except:
+        print("Connected to WiFi (IP address unavailable)")
 
 
 # Initiate WiFi connection at startup
@@ -246,7 +254,6 @@ while True:
             if now - last_wifi_attempt >= WIFI_RETRY_INTERVAL:
                 try:
                     # Check connection status - but don't immediately fail
-                    # if matrixportal.network._wifi.is_connected returns False
                     print("Checking WiFi connection...")
                     if not matrixportal.network.is_connected:
                         print("Attempting to reconnect WiFi...")
