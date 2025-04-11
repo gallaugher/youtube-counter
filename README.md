@@ -14,6 +14,10 @@ Uses:
 - Optional - screw-on magnetic feet (great for attaching to a white board
   https://www.adafruit.com/product/4631
 
+This code also works with the Matrix Portal S3, which has more memory: https://www.adafruit.com/product/5778
+If you use the S3 and you have multiple YouTube channels, you can use the "multi-channel-code.py" option. Just save this as code.py to your CIRCUITPY board.
+Also configure your multiple channels with the "multi-channel-settings.toml" file, but be sure to save this as "settings.toml" to your CIRCUITPY board.
+
 Also:
 - A Wi-Fi connection
 - Setup (free for level of use in this build) YouTube API v.3
