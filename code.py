@@ -32,13 +32,20 @@ API_KEY = os.getenv("YOUTUBE_API_KEY")
 CHANNEL_ID = os.getenv("CHANNEL_ID")
 channel_name = os.getenv("CHANNEL_NAME")
 
+# Print configuration
+print(f"YouTube API Key: {API_KEY}")
+print(f"Channel ID: {CHANNEL_ID}")
+print(f"Channel Name: {channel_name}")
+
 # ==== MatrixPortal setup ====
-matrixportal = MatrixPortal(status_neopixel=board.NEOPIXEL, bit_depth=6)
+print("Setting up MatrixPortal...")
+matrixportal = MatrixPortal(status_neopixel=board.NEOPIXEL, bit_depth=6, debug=True)
 
 YOUTUBE_API_URL = (
     "https://www.googleapis.com/youtube/v3/channels"
     f"?part=statistics&id={CHANNEL_ID}&key={API_KEY}"
 )
+print(f"API URL: {YOUTUBE_API_URL}")
 
 main_group = displayio.Group()
 
@@ -143,6 +150,39 @@ def show_stats(subs, views, color):
     views_value.text = format_stat(views)
 
 
+def print_network_info():
+    """Print the network connection details including IP address"""
+    if not matrixportal.network.is_connected:
+        print("Not connected to WiFi")
+        return
+
+    try:
+        ip_address = matrixportal.network.ip_address
+        print(f"Connected to WiFi with IP address: {ip_address}")
+
+        # Additional network info if available
+        try:
+            netmask = matrixportal.network._wifi.netmask
+            gateway = matrixportal.network._wifi.gateway
+            print(f"Netmask: {netmask}")
+            print(f"Gateway: {gateway}")
+        except:
+            # Don't break if these attributes aren't available
+            pass
+    except Exception as e:
+        print(f"Error getting network info: {e}")
+
+
+# Initiate WiFi connection at startup
+print("Initial WiFi connection attempt...")
+try:
+    matrixportal.network.connect()
+    print("Successfully connected to WiFi")
+    # Print IP address after successful connection
+    print_network_info()
+except Exception as e:
+    print(f"Initial WiFi connection issue: {e}")
+
 # ==== State ====
 last_subs = DEFAULT_SUBS
 last_views = DEFAULT_VIEWS
@@ -186,16 +226,46 @@ while True:
     # Connectivity and API handling
     if now - last_api_refresh >= interval:
         try:
-            if not matrixportal.network.is_connected:
-                if now - last_wifi_attempt >= WIFI_RETRY_INTERVAL:
-                    print("Attempting Wi-Fi connection...")
-                    matrixportal.network.connect()
+            # Modified WiFi checking - don't raise an error immediately
+            if now - last_wifi_attempt >= WIFI_RETRY_INTERVAL:
+                try:
+                    # Check connection status - but don't immediately fail
+                    # if matrixportal.network._wifi.is_connected returns False
+                    print("Checking WiFi connection...")
+                    if not matrixportal.network.is_connected:
+                        print("Attempting to reconnect WiFi...")
+                        matrixportal.network.connect()
+                        # Print IP address after reconnection
+                        print_network_info()
+                    else:
+                        print("WiFi already connected")
+                        # Print current IP address when checking connection
+                        print_network_info()
                     last_wifi_attempt = now
-                raise RuntimeError("Wi-Fi not connected")
+                except Exception as e:
+                    print(f"WiFi connection issue: {e}")
 
+            print("Fetching YouTube stats...")
             response = matrixportal.network.fetch(YOUTUBE_API_URL)
-            data = response.json()
+            print(f"Response type: {type(response)}")
+
+            # Handle different response types
+            if hasattr(response, 'json'):
+                print("Got Response object, parsing JSON...")
+                data = response.json()
+            elif isinstance(response, dict):
+                print("Got dictionary response...")
+                data = response
+            else:
+                print(f"Raw response: {response}")
+                raise ValueError(f"Unexpected response type: {type(response)}")
+
             stats = data["items"][0]["statistics"]
+
+            # Print detailed statistics
+            print("YouTube Statistics:")
+            for key, value in stats.items():
+                print(f"  {key}: {value}")
 
             raw_subs = int(stats.get("subscriberCount", "0"))
             raw_views = int(stats.get("viewCount", "0"))
@@ -204,11 +274,20 @@ while True:
             last_views = raw_views + VIEW_ADJUST
             last_color = NORMAL_COLOR
             interval = NORMAL_REFRESH_INTERVAL
-            print("Fetched stats successfully.")
+            print(f"Fetched stats successfully: {last_subs} subscribers, {last_views} views")
 
         except Exception as e:
             print(f"Error: {e}")
-            if not matrixportal.network.is_connected:
+            # Don't immediately assume WiFi issue, check connection state
+            wifi_status = "unknown"
+            try:
+                wifi_status = "connected" if matrixportal.network.is_connected else "disconnected"
+            except:
+                pass
+
+            print(f"WiFi status check: {wifi_status}")
+
+            if wifi_status == "disconnected":
                 last_color = FALLBACK_COLOR
                 last_subs = DEFAULT_SUBS
                 last_views = DEFAULT_VIEWS
