@@ -15,7 +15,7 @@ from adafruit_bitmap_font import bitmap_font
 DEFAULT_SUBS = 300
 DEFAULT_VIEWS = 1000
 SUB_ADJUST = 0
-VIEW_ADJUST = 0 # NOTE: Stats from yt app are higher, API ignores  views from retired videos no longer public.
+VIEW_ADJUST = 0  # NOTE: Stats from yt app are higher, API ignores views from retired videos no longer public.
 
 FALLBACK_COLOR = 0x55FF55  # Green
 ERROR_COLOR = 0xFFFF55  # Gold
@@ -41,17 +41,39 @@ print(f"Channel Name: {channel_name}")
 print("Setting up MatrixPortal...")
 matrixportal = MatrixPortal(status_neopixel=board.NEOPIXEL, bit_depth=6, debug=True)
 
-# Get MAC address in proper order
+# Get MAC address - Extended debugging for S3
 try:
-    # Access the ESP object from the existing MatrixPortal instance
-    esp = matrixportal.network._wifi.esp
-    if esp:
-        mac_bytes = esp.MAC_address
-        # Display MAC address in correct order (reversed)
-        mac = ":".join(["{:02X}".format(b) for b in reversed(mac_bytes)])
-        print(f"MAC Address: {mac}")
+    print("Trying to find MAC address...")
+    wifi = matrixportal.network._wifi
+
+    # Print all available attributes of the WiFi object to help debug
+    print("WiFi object attributes:")
+    for attr in dir(wifi):
+        if not attr.startswith('__'):
+            try:
+                value = getattr(wifi, attr)
+                print(f"  {attr}: {value}")
+            except Exception as e:
+                print(f"  {attr}: Error: {e}")
+
+    # For ESP32-S3 based MatrixPortal, try to access the MAC directly
+    try:
+        import wifi as wifi_module
+
+        radio = wifi_module.radio
+        mac_bytes = radio.mac_address
+        mac = ":".join(["{:02X}".format(b) for b in mac_bytes])
+        print(f"MAC Address from radio: {mac}")
+    except Exception as e:
+        print(f"Error accessing radio MAC: {e}")
+
+    # If all else fails, just provide the connection info
+    print("Connection Information:")
+    print_network_info = lambda: print(
+        f"IP: {matrixportal.network.ip_address if matrixportal.network.is_connected else 'Not connected'}")
+    print_network_info()
 except Exception as e:
-    print(f"Error getting MAC address: {e}")
+    print(f"Error during MAC address inspection: {e}")
 
 YOUTUBE_API_URL = (
     "https://www.googleapis.com/youtube/v3/channels"
@@ -178,7 +200,9 @@ def print_network_info():
             gateway = matrixportal.network._wifi.gateway
             print(f"Netmask: {netmask}")
             print(f"Gateway: {gateway}")
-        except:
+        except Exception as e:
+            # More verbose error handling for debugging
+            print(f"Error getting additional network info: {e}")
             # Don't break if these attributes aren't available
             pass
     except Exception as e:
