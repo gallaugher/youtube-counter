@@ -151,7 +151,7 @@ def fetch_stats_for(channel):
         return True
     except Exception as e:
         print("API error:", e)
-        show_stats(DEFAULT_SUBS, DEFAULT_VIEWS, ERROR_COLOR)
+        show_stats(DEFAULT_SUBS, DEFAULT_VIEWS, ERROR_COLOR)  # << explicitly call show_stats with ERROR_COLOR
         return False
 
 def fade_out():
