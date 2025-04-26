@@ -10,7 +10,7 @@ from adafruit_bitmap_font import bitmap_font
 # === CONFIG ===
 DEFAULT_SUBS = 300
 DEFAULT_VIEWS = 1000
-SCROLL_SPEED = 0.05
+SCROLL_SPEED = 0.03
 SCROLL_RESET_PAUSE = 0.5
 CHANNEL_SWITCH_SCROLLS = 3
 
@@ -121,7 +121,8 @@ def format_stat(value):
         return f"{value:,}"
 
 def show_stats(subs, views, color):
-    sub_label.color = sub_value.color = views_label.color = views_value.color = color
+    # sub_label.color = sub_value.color = views_label.color = views_value.color = color
+    sub_label.color = sub_value.color = views_label.color = views_value.color = (0, 0, 0)
     sub_value.text = format_stat(subs)
     views_value.text = format_stat(views)
 
@@ -151,7 +152,7 @@ def fetch_stats_for(channel):
         return True
     except Exception as e:
         print("API error:", e)
-        show_stats(DEFAULT_SUBS, DEFAULT_VIEWS, ERROR_COLOR)  # << explicitly call show_stats with ERROR_COLOR
+        show_stats(DEFAULT_SUBS, DEFAULT_VIEWS, ERROR_COLOR)
         return False
 
 def fade_out():
@@ -199,6 +200,7 @@ except Exception as e:
 
 # Initial fetch
 fetch_stats_for(channel)
+fade_in()
 last_api_refresh = time.monotonic()
 
 # === Main Loop ===
