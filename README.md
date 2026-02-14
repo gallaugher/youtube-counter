@@ -23,3 +23,21 @@ Also:
 - Setup (free for level of use in this build) YouTube API v.3
 - A properly configured settings.toml file the board's CIRCUITPY volume.
 - The "fonts" file with fonts enclosed in this repp, also installed on the CIRCUITPY board.
+
+You'll need to install the following libraries (downloadable from circuitpython.org) onto your CIRCUITPY board's "lib" folder:
+neopixel.mpy
+adafruit_bitmap_font
+adafruit_bus_device
+adafruit_connection_manager.mpy
+adafruit_display_text
+adafruit_esp32spi
+adafruit_fakerequests.mpy
+adafruit_io
+adafruit_matrixportal
+adafruit_minimqtt
+adafruit_miniqr.mpy
+adafruit_pixelbuf.mpy
+adafruit_portalbase
+adafruit_requests.mpy
+adafruit_ticks.mpy
+simpleio.mpy
