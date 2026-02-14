@@ -41,5 +41,6 @@ adafruit_portalbase
 adafruit_requests.mpy
 adafruit_ticks.mpy
 simpleio.mpy
+
 <img width="283" height="415" alt="lib files to include" src="https://github.com/user-attachments/assets/4063ce5e-be84-43d4-988c-84f22daae49e" />
 
