@@ -2,10 +2,13 @@
 # This code will not work with a MatrixPortal M4 (not enough memory)
 # Use the file format for settings.toml you'll find in multi-channel-settings.toml in the github repo, just be sure to rename it settings.toml on your CIRCUITPY board.
 
-import board, time, terminalio, displayio, os
+import board, time, terminalio, displayio, os, wifi
 from adafruit_matrixportal.matrixportal import MatrixPortal
 from adafruit_display_text.label import Label
 from adafruit_bitmap_font import bitmap_font
+
+mac = wifi.radio.mac_address
+print("MAC Address:", ":".join([f"{b:02X}" for b in mac]))
 
 # === CONFIG ===
 DEFAULT_SUBS = 300
@@ -245,4 +248,4 @@ while True:
         fetch_stats_for(channel)
         last_api_refresh = now
 
-    time.sleep(0.01) 
+    time.sleep(0.01)
