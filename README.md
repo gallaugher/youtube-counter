@@ -1,13 +1,13 @@
 NOTE: I've updated the code to allow a creator with multiple channels to show stats for each channel. If you have only one channel, you can simply update settings.toml with only one channel:<BR>
 YOUTUBE_API_KEY = "API_KEY_HERE"<BR>
-CHANNEL_ID = "CHANNEL_ID_HERE"
-CHANNEL_NAME = "CHANNEL_NAME_HERE"
-SUB_ADJUST = 0 # if any
-VIEW_ADJUST = 0 # if any
-But if you have multiple channels, you can simply add a # to the name of additional parameters in settings.toml like this:
-YOUTUBE_API_KEY2 = "2ND_API_KEY_HERE"
-CHANNEL_ID2 = "2ND_CHANNEL_ID_HERE"
-CHANNEL_NAME2 = "2ND_CHANNEL_NAME_HERE"
+CHANNEL_ID = "CHANNEL_ID_HERE"<BR>
+CHANNEL_NAME = "CHANNEL_NAME_HERE"<BR>
+SUB_ADJUST = 0 # if any<BR>
+VIEW_ADJUST = 0 # if any<BR>
+But if you have multiple channels, you can simply add a # to the name of additional parameters in settings.toml like this:<BR>
+YOUTUBE_API_KEY2 = "2ND_API_KEY_HERE"<BR>
+CHANNEL_ID2 = "2ND_CHANNEL_ID_HERE"<BR>
+CHANNEL_NAME2 = "2ND_CHANNEL_NAME_HERE"<BR>
 
 [![Watch the demo](https://img.youtube.com/vi/vdzAB8LIbmQ/0.jpg)](https://youtu.be/vdzAB8LIbmQ)
 
